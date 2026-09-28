@@ -10,6 +10,8 @@ table 'Currency Exchange'
 		summarizeBy: none
 		sourceColumn: Date
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	/// Currency in which the sale was recorded.
 	column 'From Currency'
 		dataType: string

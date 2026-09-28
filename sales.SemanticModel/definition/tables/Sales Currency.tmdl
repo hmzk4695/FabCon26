@@ -1,4 +1,5 @@
 table 'Sales Currency'
+	lineageTag: 8a1d7456-ef8a-4f92-9b44-ca3f4e9c3887
 
 	/// Select EUR, USD or GBP to convert base sales, cost and margin using the sale currency and order date. Rates dated at month end apply to earlier days in that month; counts and derived measures are left unchanged.
 	calculationGroup
@@ -96,6 +97,7 @@ table 'Sales Currency'
 
 	column 'Sales Currency'
 		dataType: string
+		lineageTag: d7957adc-4a21-44b1-8aa4-68559eae0739
 
 	partition 'Partition_Sales Currency' = calculationGroup
 
