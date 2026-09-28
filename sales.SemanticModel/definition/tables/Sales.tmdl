@@ -1,26 +1,32 @@
 table Sales
 	lineageTag: 97143e5b-7736-4fcb-8042-26b92b1f5684
 
+	/// Counts distinct customers with at least one sales record in the current filter context. Use this to see how many customers are purchasing across Northwind Retail Group’s store, NRG Shop, and wholesale business.
 	measure '# Customers (w/ Sales)' = DISTINCTCOUNT('Sales'[CustomerKey])
 		formatString: #,##0
 		lineageTag: 4ec872f0-a42d-4aa9-bf6b-1ca7c4916336
 
+	/// Totals individual product units sold in the current filter context; this is unit volume, not the number of baskets or transactions. It is especially useful alongside revenue when assessing high-volume, lower-margin January clearance or seasonal demand.
 	measure 'Sales Qty' = sum('Sales'[Quantity])
 		formatString: #,##0
 		lineageTag: c2ff8d96-2f03-4005-84df-91458625b73b
 
+	/// Calculates net sales revenue as quantity multiplied by net unit price, reflecting discounts and returns rather than gross sales. Use this as Northwind Retail Group’s revenue measure across brands and channels.
 	measure 'Sales Amount' = SUMX('Sales', 'Sales'[Quantity] * 'Sales'[Net Price])
 		formatString: $ #,##0
 		lineageTag: a8e95485-02a2-4525-b02a-b2418fbdbe4c
 
+	/// Returns net sales for the comparable period one year earlier, using the model calendar. This supports year-over-year comparisons across Northwind Retail Group’s seasonal trading cycles; fiscal years run February through January.
 	measure 'Sales Amount (LY)' = IF ([Sales Amount] > 0, CALCULATE([Sales Amount], SAMEPERIODLASTYEAR('Calendar'[Date])))
 		formatString: "€"#,0.###############;("€"#,0.###############);"€"#,0.###############
 		lineageTag: 3fa889ae-64b9-4a6e-b0e6-c81c90fd32bf
 
+	/// Calculates average daily net sales across the dates in the current calendar filter context. This helps compare trading pace across periods despite differences in their number of days.
 	measure 'Sales Amount Avg per Day' = AVERAGEX(VALUES('Calendar'[Date]), [Sales Amount])
 		formatString: $ #,##0
 		lineageTag: 65842ce7-7176-4106-868e-2e83aaa62b4c
 
+	/// Calculates gross margin dollars as units sold multiplied by the difference between net selling price and unit cost; it is not a margin percentage. Discounts, returns, and seasonal mix—such as January clearance—can affect the result.
 	measure Margin =
 			SUMX (
 			    Sales,
@@ -30,10 +36,12 @@ table Sales
 		formatString: $ #,##0
 		lineageTag: d22a262b-b776-4ccd-b9bd-7ef9c90eba51
 
+	/// Counts sales records in the current filter context; each record may represent a sales line rather than a distinct transaction or basket. Use the customer, product, date, and channel context to understand the records being counted.
 	measure '# Sales' = COUNTROWS('Sales')
 		formatString: #,##02
 		lineageTag: 67791bd1-5f33-4a29-a9ac-be0ad2453fcf
 
+	/// Calculates the average daily net sales across the trailing 12 calendar months ending on the latest selected date. It is a rolling trend measure, not a fiscal-year total; Northwind’s fiscal year runs February through January.
 	measure 'Sales Amount (12M average)' =
 			
 			VAR v_selDate =
@@ -51,6 +59,7 @@ table Sales
 		formatString: $ #,##0
 		lineageTag: 7fd60f7e-287e-46c3-a745-24c4507bc77b
 
+	/// Calculates the average daily net sales across the trailing 6 calendar months ending on the latest selected date. This rolling view helps surface shorter-term shifts around seasonal peaks such as back-to-school, holiday, and spring refresh.
 	measure 'Sales Amount (6M average)' =
 			VAR v_selDate =
 			    MAX ( 'Calendar'[Date] )
@@ -67,6 +76,7 @@ table Sales
 		formatString: $ #,##0
 		lineageTag: 9a48bea0-e5fb-40fa-9e81-f61288e31a02
 
+	/// Calculates total product cost as units sold multiplied by unit cost in the current filter context. Compare it with net sales and margin to understand product economics across Northwind Retail Group’s brands and channels.
 	measure Cost = SUMX ( Sales, Sales[Quantity] * Sales[Unit Cost] )
 		formatString: $ #,##0
 		lineageTag: 3e5cb67e-a411-476f-ad34-7ec10dfd084d

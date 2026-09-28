@@ -1,6 +1,7 @@
 table Customer
 	lineageTag: 04227f5a-0aeb-4448-b5c5-dbf3e276da85
 
+	/// Counts customer records in the current filter context, whether or not they made a purchase in the selected period. For purchasing customers only, use “# Customers (w/ Sales)” instead.
 	measure '# Customers' = COUNTROWS('Customer')
 		formatString: #,##0
 		lineageTag: a8dc565a-aa9b-40dc-902c-1ba2596b0977

@@ -1,0 +1,54 @@
+/// Exchange rates from transaction currency to EUR, USD or GBP. Rates are recorded at month end through 2019 and daily in 2020; use the first available rate on or after the sale date.
+table 'Currency Exchange'
+	lineageTag: 79d930ca-98f8-4501-a4fc-81dd10878bcd
+
+	/// Date of the published exchange rate.
+	column Date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 4a330764-38ac-4f0a-9d4e-259c49196cfd
+		summarizeBy: none
+		sourceColumn: Date
+
+	/// Currency in which the sale was recorded.
+	column 'From Currency'
+		dataType: string
+		lineageTag: c67125d7-807e-43b6-8db3-c40e84668731
+		summarizeBy: none
+		sourceColumn: From Currency
+
+	/// Currency into which the sale is converted: EUR, USD or GBP.
+	column 'To Currency'
+		dataType: string
+		lineageTag: 2a38e22a-dcca-4a48-8aca-0ea108055270
+		summarizeBy: none
+		sourceColumn: To Currency
+
+	/// Units of target currency per one unit of source currency on the published rate date.
+	column 'Exchange Rate'
+		dataType: decimal
+		isHidden
+		lineageTag: e846b8e0-0316-4f7f-8f2b-d18df143e6c7
+		summarizeBy: none
+		sourceColumn: Exchange Rate
+
+	partition 'Currency Exchange' = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(
+				        Web.Contents(HttpSource, [RelativePath = "RAW-CurrencyExchange.csv"]),
+				        [Delimiter = ",", Columns = 4, Encoding = 65001, QuoteStyle = QuoteStyle.None]
+				    ),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    #"Renamed Columns" = Table.RenameColumns(
+				        #"Promoted Headers",
+				        {{"FromCurrency", "From Currency"}, {"ToCurrency", "To Currency"}, {"Exchange", "Exchange Rate"}}
+				    ),
+				    #"Changed Column Types" = Table.TransformColumnTypes(
+				        #"Renamed Columns",
+				        {{"Date", type date}, {"From Currency", type text}, {"To Currency", type text}, {"Exchange Rate", Currency.Type}}
+				    )
+				in
+				    #"Changed Column Types"
+
